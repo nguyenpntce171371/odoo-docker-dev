@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: odoo-postgres
+    restart: unless-stopped
+    volumes:
+      - odoo_postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: odoo
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo 
+    networks:
+      - web
+
+  odoo:
+    image: odoo:19
+    container_name: odoo
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    volumes:
+      - ./odoo:/mnt/odoo
+      - ./addons:/mnt/addons
+      - ./odoo.conf:/etc/odoo/odoo.conf:ro
+    command: odoo -c /etc/odoo/odoo.conf
+    networks:
+      - web
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: odoo-caddy
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - odoo_caddy_data:/data
+      - odoo_caddy_config:/config
+    depends_on:
+      - odoo
+    networks:
+      - web
+
+  code-server-init:
+    image: busybox
+    user: "0:0"
+    volumes:
+      - odoo_code_server_data:/data
+    command: >
+      sh -c "chown -R 1000:1000 /data"
+    restart: "no"
+
+  code-server:
+    image: codercom/code-server:latest
+    user: "1000:1000"
+    depends_on:
+      code-server-init:
+        condition: service_completed_successfully
+    container_name: odoo-code-server
+    restart: unless-stopped
+    environment:
+      PASSWORD: ${CODE_SERVER_PASSWORD}
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - .:/home/coder/project-odoo
+      - odoo_code_server_data:/home/coder/.local/share/code-server
+    command: >
+      code-server
+      --bind-addr 0.0.0.0:8080
+      --auth password
+      /home/coder/project-odoo
+    networks:
+      - web
+
+volumes:
+  odoo_postgres_data:
+  odoo_caddy_data:
+  odoo_caddy_config:
+  odoo_code_server_data:
+
+networks:
+  web:
+    external: true
