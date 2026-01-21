@@ -7,7 +7,7 @@ services:
       - odoo_postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo 
+      POSTGRES_PASSWORD: odoo
     networks:
       - web
 
@@ -23,9 +23,9 @@ services:
       - ./addons:/mnt/addons
       - ./odoo.conf:/etc/odoo/odoo.conf:ro
     command: >
-      odoo
-      -c /etc/odoo/odoo.conf
-      --without-demo=all
+      odoo -c /etc/odoo/odoo.conf --without-demo=all
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     networks:
       - web
 
