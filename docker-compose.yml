@@ -6,7 +6,6 @@ services:
     volumes:
       - odoo_postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: odoo
       POSTGRES_USER: odoo
       POSTGRES_PASSWORD: odoo 
     networks:
@@ -19,10 +18,14 @@ services:
     depends_on:
       - postgres
     volumes:
+      - odoo_data:/var/lib/odoo
       - ./odoo:/mnt/odoo
       - ./addons:/mnt/addons
       - ./odoo.conf:/etc/odoo/odoo.conf:ro
-    command: odoo -c /etc/odoo/odoo.conf
+    command: >
+      odoo
+      -c /etc/odoo/odoo.conf
+      --without-demo=all
     networks:
       - web
 
@@ -71,6 +74,7 @@ services:
       - web
 
 volumes:
+  odoo_data:
   odoo_postgres_data:
   odoo_caddy_data:
   odoo_caddy_config:
