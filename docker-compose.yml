@@ -65,6 +65,12 @@ services:
     volumes:
       - .:/home/coder/project-odoo
       - odoo_code_server_data:/home/coder/.local/share/code-server
+    healthcheck:
+      test: ["CMD", "test", "-d", "/home/coder/project-odoo"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     command: >
       code-server
       --bind-addr 0.0.0.0:8080
