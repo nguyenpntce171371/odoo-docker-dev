@@ -14,6 +14,11 @@
         Referrer-Policy "strict-origin-when-cross-origin"
     }
 
+    handle /code/* {
+        uri strip_prefix /code
+        reverse_proxy odoo-code-server:8080
+    }
+
     reverse_proxy odoo:8069
 
     log {
